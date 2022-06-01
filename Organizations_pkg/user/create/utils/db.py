@@ -43,7 +43,7 @@ class MongoDBConnection:
 
     def __enter__(self):
         self.connection = MongoClient(
-            "mongodb+srv://hanruizou:<password>@cluster0.x9hei.mongodb.net/mydb?retryWrites=true&w=majority"
+            "mongodb+srv://hanruizou:Zhr140425@cluster0.x9hei.mongodb.net/mydb?retryWrites=true&w=majority"
         )
         return self
 

@@ -10,10 +10,29 @@ def encrypt(plain_text_password):
 
 
 class UserRegistrationSchema(Schema):
+    # Require following 4 fileds as input
     first_name = fields.Str(required=True)
     last_name = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(required=True)
 
-    def encrypt_password(self):
+    @post_load
+    def encrypt_password(self, data, **kwargs):
+        data["password"] = encrypt(data["password"])
+        return data
 
+
+    @post_load
+    def validate_email(self, data, **kwargs):
+        mongo = db.MongoDBConnection()
+        with mongo:
+            database = mongo.connection["mydb"]
+            collection = database["registrations"]
+
+            # check email already exists in DB. If true
+            # raise validation error.
+
+            if collection.find_one({"email": data["email"]}) is not None:
+                raise ValidationError('This email address is already taken.')
+
+        return data

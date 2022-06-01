@@ -9,33 +9,148 @@ Description: >
 Globals:
   Function:
     Timeout: 3
+    MemorySize: 2048
 
 Resources:
-  HelloWorldFunction:
+  MyApi:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: Test
+      Auth:
+        DefaultAuthorizer: JWTCustomAuthorizer
+        Authorizers:
+          JWTCustomAuthorizer:
+            FunctionArn: !GetAtt JWTAuthFunction.Arn
+
+  JWTAuthFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: organizations/user/
+      Handler: authorizer.app.lambda_handler
+      Runtime: python3.8
+      Environment:
+        Variables:
+          SECRET_KEY: secret-info
+
+
+  OrganizationUserCreate:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: hello_world/
-      Handler: app.lambda_handler
+      CodeUri: Organizations_pkg/user
+      Handler: create.app.lambda_handler
       Runtime: python3.9
-      Architectures:
-        - x86_64
       Events:
-        HelloWorld:
+        CompanyCreateUserPostAPI:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /hello
-            Method: get
+            RestApiId: !Ref MyApi
+            Path: '/user'
+            Method: POST
 
-Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+
+  OrganizationUserRead:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: Organizations_pkg/user
+      Handler: read.app.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          SECRET-KEY: secret-info
+      Events:
+        CompanyUserGetAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: '/user'
+            Method: GET
+
+
+  OrganizationUserReadById:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: Organizations_pkg/user
+      Handler: read.app.lambda_handler
+      Runtime: python3.9
+      Events:
+        CompanyUserGetAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: '/user/{Id}'
+            Method: GET
+
+
+  OrganizationUserUpdateById:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: Organizations_pkg/user
+      Handler: update.app.lambda_handler
+      Runtime: python3.9
+      Events:
+        CompanyUserUpdateByIdAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: '/user/{Id}'
+            Method: PUT
+
+
+
+  OrganizationUserDeleteById:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: Organizations_pkg/user
+      Handler: delete.app.lambda_handler
+      Runtime: python3.9
+      Events:
+        CompanyUserDeleteByIdAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: '/user/{Id}'
+            Method: DELETE
+
+
+  OrganizationUserLogin:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: Organizations_pkg/user/
+      Handler: login.app.lambda_handler
+      Runtime: python3.8
+      Environment:
+        Variables:
+          SECRET_KEY: secret-info
+      Events:
+        LoginAPI:
+          Type: Api
+          Properties:
+            RestApi: !Ref MyApi
+            Path: '/user/login'
+            Method: POST
+            Auth:
+              Authorizer: None
+
+
+  OrganizationRefreshToken:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: Organizations_pkg/user
+      Handler: login.app.token_refresh
+      Runtime: python3.8
+      Environment:
+        Variables:
+          SECRET_KEY: secret-info
+        Events:
+          LoginAPI:
+            Type: Api
+            Properties:
+              RestApi: !Ref MyApi
+              Path: '/user/refresh-token'
+              Method: POST
+
+
+
+
+
+
