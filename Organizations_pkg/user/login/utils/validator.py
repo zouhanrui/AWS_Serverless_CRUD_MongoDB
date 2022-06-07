@@ -40,7 +40,7 @@ class RefreshTokenSchema(Schema):
 
     @post_load
     def validate_token(self, data, **kwargs):
-        # print(data['token'])
+        # print("token: " + data['token'])
         refresh_token = token.refresh_token(data['token'])
         if refresh_token['status']:
             data['token'] = refresh_token['data']

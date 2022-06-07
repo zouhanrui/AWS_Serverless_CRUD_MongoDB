@@ -35,7 +35,7 @@ def refresh_token(token):
             # extend 5 mins for current token
             },
                 os.environ['SECRET_KEY'])
-
+        print("refreshed token: " + jwt_info)
         return {
             "status": True,
             "data": jwt_info,

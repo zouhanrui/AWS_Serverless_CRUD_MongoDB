@@ -9,6 +9,7 @@ class MongoDBConnection:
     def __enter__(self):
         self.connection = MongoClient(
             'mongodb+srv://hanruizou:Zhr140425@cluster0.x9hei.mongodb.net/?retryWrites=true&w=majority'
+            # "mongodb+srv://mukulmantosh:9fRIqCFZ1hA9RLE4@mydb.6q0tq.mongodb.net/myDB?retryWrites=true&w=majority"
         )
 
         return self
@@ -20,7 +21,7 @@ class MongoDBConnection:
 def main():
     mongo = MongoDBConnection()
     with mongo:
-        mydb = mongo.connection.mydb
+        mydb = mongo.connection['mydb']
         mycollection = mydb['mycollection']
         # print(mycollection.find())
         """
@@ -49,17 +50,15 @@ def main():
 
         # print(mycollection.find_one({'name':'hanrui'}))
 
-        # for user in mycollection.find():
-            # print(user['name'])
+        for user in mycollection.find():
+            print(user['name'])
+        """
         try:
             obj = mycollection.find_one({'name':'hanrui'})
             print(obj) # None
         except bson.errors.InvalidId:
-            return {'err': 'Invalid input'}
-
-
-
-
+            return {'err': 'Invalid input'}        
+        """
 
 
 if __name__ == '__main__':

@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'AWS_Serverless_demo
+
+  Sample SAM Template for AWS_Serverless_demo
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 2048
+Resources:
+  MyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Test
+      Auth:
+        DefaultAuthorizer: JWTCustomAuthorizer
+        Authorizers:
+          JWTCustomAuthorizer:
+            FunctionArn:
+              Fn::GetAtt:
+              - JWTAuthFunction
+              - Arn
+    Metadata:
+      SamResourceId: MyApi
+  JWTAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://my-serverless-pycharm-deploy/d41d8cd98f00b204e9800998ecf8427e
+      Handler: authorizer.app.lambda_handler
+      Runtime: python3.8
+      Environment:
+        Variables:
+          SECRET_KEY: secret-info
+    Metadata:
+      SamResourceId: JWTAuthFunction
+  OrganizationUserCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://my-serverless-pycharm-deploy/5ae5ef243b03b2e6584f224876c95aa6
+      Handler: create.app.lambda_handler
+      Runtime: python3.9
+      Events:
+        CompanyCreateUserPostAPI:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /user
+            Method: POST
+    Metadata:
+      SamResourceId: OrganizationUserCreate
+  OrganizationUserRead:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://my-serverless-pycharm-deploy/5ae5ef243b03b2e6584f224876c95aa6
+      Handler: read.app.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          SECRET-KEY: secret-info
+      Events:
+        CompanyUserGetAPI:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /user
+            Method: GET
+    Metadata:
+      SamResourceId: OrganizationUserRead
+  OrganizationUserReadById:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://my-serverless-pycharm-deploy/5ae5ef243b03b2e6584f224876c95aa6
+      Handler: read.app.lambda_handler
+      Runtime: python3.9
+      Events:
+        CompanyUserGetAPI:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /user/{Id}
+            Method: GET
+    Metadata:
+      SamResourceId: OrganizationUserReadById
+  OrganizationUserUpdateById:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://my-serverless-pycharm-deploy/5ae5ef243b03b2e6584f224876c95aa6
+      Handler: update.app.lambda_handler
+      Runtime: python3.9
+      Events:
+        CompanyUserUpdateByIdAPI:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /user/{Id}
+            Method: PUT
+    Metadata:
+      SamResourceId: OrganizationUserUpdateById
+  OrganizationUserDeleteById:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://my-serverless-pycharm-deploy/5ae5ef243b03b2e6584f224876c95aa6
+      Handler: delete.app.lambda_handler
+      Runtime: python3.9
+      Events:
+        CompanyUserDeleteByIdAPI:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /user/{Id}
+            Method: DELETE
+    Metadata:
+      SamResourceId: OrganizationUserDeleteById
+  OrganizationUserLogin:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://my-serverless-pycharm-deploy/a54aba43991e3db5456c5808310c432d
+      Handler: login.app.lambda_handler
+      Runtime: python3.8
+      Environment:
+        Variables:
+          SECRET_KEY: secret-info
+      Events:
+        LoginAPI:
+          Type: Api
+          Properties:
+            RestApi:
+              Ref: MyApi
+            Path: /user/login
+            Method: POST
+            Auth:
+              Authorizer: None
+    Metadata:
+      SamResourceId: OrganizationUserLogin
+  OrganizationRefreshToken:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://my-serverless-pycharm-deploy/a54aba43991e3db5456c5808310c432d
+      Handler: login.app.token_refresh
+      Runtime: python3.8
+      Environment:
+        Variables:
+          SECRET_KEY: secret-info
+        Events:
+          LoginAPI:
+            Type: Api
+            Properties:
+              RestApi:
+                Ref: MyApi
+              Path: /user/refresh-token
+              Method: POST
+    Metadata:
+      SamResourceId: OrganizationRefreshToken

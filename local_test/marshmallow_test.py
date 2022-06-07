@@ -1,6 +1,7 @@
 import datetime as dt
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, post_load
 from pprint import pprint
+import json
 
 
 class User:
@@ -18,6 +19,10 @@ class UserSchema(Schema):
     email = fields.Email()
     created_at = fields.DateTime()
 
+    @post_load
+    def post_loaded(self, data, **kwargs):
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+
 
 def main():
     user1 = User(name='hanrui', email='hanrui@gmail.com')
@@ -33,17 +38,17 @@ def main():
     # print(error)
     result2 = schema.dump(user2)
     error2 = schema.validate(result2)
-    print(error2)  # {}
-    print(bool(error2))  # False
+    # print(error2)  # {}
+    # print(bool(error2))  # False
 
     result3 = schema.dump(user3)
     error3 = schema.validate(result3)
-    print(error3)  # {'email': ['Not a valid email address.']}
-    print(bool(error3))  # True
-
-
-
-
+    # print(error3)  # {'email': ['Not a valid email address.']}
+    # print(bool(error3))  # True
+    dic = {"name": "sadfasdfasdf",
+           "email": "hanrui@lsdkajf.com"}
+    json_str = json.dumps(dic)
+    schema.loads(json_str)
 
 
 if __name__ == '__main__':

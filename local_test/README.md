@@ -112,4 +112,27 @@ https://pypi.org/project/ujson/
 >> {'some': 'payload'}
 
 
+# Python unit test
 
+> Python’s assert statement
+> 
+> https://realpython.com/python-assert-statement/#the-syntax-of-the-assert-statement
+
+
+
+# json
+> json.loads() vs json.dumps()
+> 
+> https://www.educative.io/edpresso/what-is-the-difference-between-jsonloads-and-jsondumps
+> 
+> 
+
+# API 
+> RESTful API vs. HTTP API 
+>> https://hevodata.com/learn/http-api-vs-rest-api/
+> 
+>  
+> API Gateway
+>> https://www.redhat.com/en/topics/api/what-does-an-api-gateway-do
+>
+>> https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html

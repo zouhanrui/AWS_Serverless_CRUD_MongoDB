@@ -10,6 +10,9 @@ Globals:
   Function:
     Timeout: 3
     MemorySize: 2048
+    Environment:
+      Variables:
+        SECRET_KEY: secret-info
 
 Resources:
   MyApi:
@@ -25,12 +28,10 @@ Resources:
   JWTAuthFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: organizations/user/
+      CodeUri: Organizations_pkg/user/
       Handler: authorizer.app.lambda_handler
       Runtime: python3.8
-      Environment:
-        Variables:
-          SECRET_KEY: secret-info
+
 
 
   OrganizationUserCreate:
@@ -51,12 +52,9 @@ Resources:
   OrganizationUserRead:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: Organizations_pkg/user
+      CodeUri: Organizations_pkg/user/
       Handler: read.app.lambda_handler
       Runtime: python3.9
-      Environment:
-        Variables:
-          SECRET-KEY: secret-info
       Events:
         CompanyUserGetAPI:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -118,18 +116,15 @@ Resources:
       CodeUri: Organizations_pkg/user/
       Handler: login.app.lambda_handler
       Runtime: python3.8
-      Environment:
-        Variables:
-          SECRET_KEY: secret-info
       Events:
         LoginAPI:
           Type: Api
           Properties:
-            RestApi: !Ref MyApi
+            RestApiId: !Ref MyApi
             Path: '/user/login'
             Method: POST
             Auth:
-              Authorizer: None
+              Authorizer: NONE
 
 
   OrganizationRefreshToken:
@@ -138,16 +133,13 @@ Resources:
       CodeUri: Organizations_pkg/user
       Handler: login.app.token_refresh
       Runtime: python3.8
-      Environment:
-        Variables:
-          SECRET_KEY: secret-info
-        Events:
-          LoginAPI:
-            Type: Api
-            Properties:
-              RestApi: !Ref MyApi
-              Path: '/user/refresh-token'
-              Method: POST
+      Events:
+        LoginAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: '/user/refresh-token'
+            Method: POST
 
 
 
